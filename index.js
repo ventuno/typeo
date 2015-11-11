@@ -51,6 +51,16 @@ function init() {
     name: 'number',
     obj: 'number'
   }, typeo.typesDef, typeo.types);
+  // any is any type but undefined and null
+  addTypeDef({
+    name: 'any',
+    checkType: function (type, value) {
+      if (value !== undefined && value !== null) {
+        return true;
+      }
+      return false;
+    }
+  }, typeo.typesDef, typeo.types);
   addTypeDef({
     name: 'function',
     obj: 'function'
@@ -68,7 +78,13 @@ typeo.declare = function (args, fn, context) {
     return fn;
   }
   return function () {
-    if (arguments.length === args.length) {
+    var optionalArgsCount = 0;
+    for (var i = 0; i < args.length; i++) {
+      if (args[i].optional) {
+        optionalArgsCount++;
+      }
+    }
+    if (args.length === arguments.length || args.length - optionalArgsCount === arguments.length) {
       for (var i = 0; i < arguments.length; i++) {
         if (!checkType(args[i].type, arguments[i], typeo.typesDef)) {
           var type = args[i].type;
